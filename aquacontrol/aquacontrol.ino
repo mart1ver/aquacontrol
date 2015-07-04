@@ -68,11 +68,10 @@ void setup() {
     Serial.print("initialisation de la carte SD...");
 // make sure that the default chip select pin is set to
 // output, even if you don't use it:
-    pinMode(10, OUTPUT);
-// see if the card is present and can be initialized:
+    pinMode(chipSelect, OUTPUT);
+// verrifier si la carte sd est bien presente et initialisée.
     if (!SD.begin(chipSelect)) {
       Serial.println("Erreur de carte SD, ou carte SD non presente");
-// don't do anything more:
       return;
     }
     Serial.println("Carte SD initialisee.");
@@ -88,11 +87,11 @@ void setup() {
     }  
 // if the file isn't open, pop up an error:
     else {
-    Serial.println("error opening config.txt");
+    Serial.println("erreur à l'ouverture de config.txt");
     } 
     delay(850);
   }
-
+  
 void loop() {
     tmElements_t tm;
    if (theminute > lastminute){
@@ -120,10 +119,10 @@ void loop() {
 //fin du code executé toutes les minutes
    }
    if (RTC.read(tm)) {
-     //code executée toutes les secondes
+//code executée toutes les secondes
      Serial.print(".");
      
-     //fin du code executée toutes les secondes
+//fin du code executée toutes les secondes
      } else {
      if (RTC.chipPresent()) {
        Serial.println("Le DS1307 est arrete.  Reglez l'heure SVP.");
@@ -144,11 +143,12 @@ void print2digits(int number) {
   }
   Serial.print(number);
 }
+
 void nourir() {
-  //sequence de nourrissage des poissons
-   Serial.println("Nourrissage des poissons.");
+//sequence de nourrissage des poissons à l'aide du servomoteur prévu à cet effet
+      Serial.println("Nourrissage des poissons.");
       Serial.println();
-  nourrissage.write(0);              // tell servo to go to position in variable '0' 
+nourrissage.write(0);              // tell servo to go to position in variable '0' 
     delay(150);   
 nourrissage.write(255);              // tell servo to go to position in variable '255' 
     delay(1500); 
@@ -163,6 +163,7 @@ void relais()
 }
 
 
-void enregistre(){
-
+void enregistre()
+{
+//enregistre les données des differents capteurs sur la carte sd
 }
