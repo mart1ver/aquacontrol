@@ -23,10 +23,19 @@ controle instalation aquaponique suspendue
  * servomoteur de nourissage des poissons
    ** pwm - pin 3
  * capteur de niveau d'eau aquarium
-   **  
+   **  A prevoir niveau materiel
  * capteur ph eau de l'aquarium
-   **
+   **  A prevoir niveau materiel
+=================le fichier de configuration config.txt sur la carte sd==================================
+Contient, (separé par des virgules?), différentes variables de configuration du cycle:
+-horaires de declenchement de la pompe
+-horaires de declenchement de l'eclairage
+-nombre de minutes entre chaque prise de logs
+-eventuellement ph cible (pour les versions anterieures, car le materiel n'est pas pret..)
+-eventuellement les niveau mini et maxi tolerables dans l'aquarium (pour les versions anterieures, car le materiel n'est pas pret..)
 
+=================le fichier de logs log.csv sur la carte sd==================================
+Contient, au format csv, les données des logs
 
 ________Martin Vert 2015____________________________________________________________________________________________________________________ 
  */
@@ -66,8 +75,7 @@ void setup() {
     Serial.println("(Controlleur Mur vegetal MV)");
     Serial.println("(V. 0.0.0 non fonctionnel)"); 
     Serial.print("initialisation de la carte SD...");
-// make sure that the default chip select pin is set to
-// output, even if you don't use it:
+// placer le chipselect du spi en output au cas ou...
     pinMode(chipSelect, OUTPUT);
 // verrifier si la carte sd est bien presente et initialisée.
     if (!SD.begin(chipSelect)) {
