@@ -46,6 +46,11 @@ ________Martin Vert 2015________________________________________________________
     short R1 = A3; //commande du relais 1
     short R2 = 4; //commande du relais 2
     short R3 = 7; //commande du relais 3
+    short R0STATE = LOW;
+    short R1STATE = LOW;
+    short R2STATE = LOW;
+    short R3STATE = LOW;
+    
     short servo_nourrssage = 3; //commande du servomoteur de nourrissage
 
 // declaration des librairies
@@ -67,17 +72,17 @@ ________Martin Vert 2015________________________________________________________
 void setup() {
 // initialise les quatres relais
     pinMode(R0, OUTPUT);
-    digitalWrite(R0, LOW);
-    short R0STATE = LOW;
+    digitalWrite(R0, R0STATE);
+    
     pinMode(R1, OUTPUT);
-    digitalWrite(R1, LOW);
-    short R1STATE = LOW;
+    digitalWrite(R1, R1STATE);
+    
     pinMode(R2, OUTPUT);
-    digitalWrite(R2, LOW);
-    short R2STATE = LOW;
+    digitalWrite(R2, R2STATE);
+    
     pinMode(R3, OUTPUT);
-    digitalWrite(R3, LOW);
-    short R3STATE = LOW;
+    digitalWrite(R3, R3STATE);
+    
     
     
        
@@ -188,7 +193,14 @@ void relais(short numero)
 //allume le relais ou l'eteind selon son etat
   switch (numero) {
     case 'R0':    // your hand is on the sensor
-      Serial.println("dark");
+      if(R0STATE = LOW)
+    {
+      
+    }
+    else
+    {
+    
+    }
       break;
     case 'R1':    // your hand is close to the sensor
       Serial.println("dim");
