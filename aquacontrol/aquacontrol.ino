@@ -165,7 +165,7 @@ nourrissage.write(0);              // tell servo to go to position in variable '
 }
 
 
-void relais()
+void relais(int numero)
 {
 //allume le relais ou l'eteind selon son etat
 }
