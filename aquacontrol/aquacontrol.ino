@@ -65,6 +65,24 @@ ________Martin Vert 2015________________________________________________________
     int theminute = tm.Minute;//initialise les variables liees à la mesure du temps
   
 void setup() {
+// initialise les quatres relais
+    pinMode(R0, OUTPUT);
+    digitalWrite(R0, LOW);
+    short R0STATE = LOW;
+    pinMode(R1, OUTPUT);
+    digitalWrite(R1, LOW);
+    short R1STATE = LOW;
+    pinMode(R2, OUTPUT);
+    digitalWrite(R2, LOW);
+    short R2STATE = LOW;
+    pinMode(R3, OUTPUT);
+    digitalWrite(R3, LOW);
+    short R3STATE = LOW;
+    
+    
+       
+    
+    
     nourrissage.attach(servo_nourrssage);  // attaches the servo on 'servo_nourrisage' to the servo object 
     nourrissage.write(0);              // servo_nourrissage en position '0'
     delay(150);   
@@ -165,9 +183,23 @@ nourrissage.write(0);              // tell servo to go to position in variable '
 }
 
 
-void relais(int numero)
+void relais(short numero)
 {
 //allume le relais ou l'eteind selon son etat
+  switch (numero) {
+    case 'R0':    // your hand is on the sensor
+      Serial.println("dark");
+      break;
+    case 'R1':    // your hand is close to the sensor
+      Serial.println("dim");
+      break;
+    case 'R2':    // your hand is a few inches from the sensor
+      Serial.println("medium");
+      break;
+    case 'R3':    // your hand is nowhere near the sensor
+      Serial.println("bright");
+      break;
+  }
 }
 
 
