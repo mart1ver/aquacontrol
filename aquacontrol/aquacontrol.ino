@@ -40,18 +40,21 @@ Contient, au format csv, les données des logs
 ________Martin Vert 2015____________________________________________________________________________________________________________________ 
  */
  // declaration des E/S
-    short chipSelect = 8; //CS sur le spi de la carte SD
-    short DDS = 2; // DATA sur les dallas 18b20
-    short R0 = A2; //commande du relais 0
-    short R1 = A3; //commande du relais 1
-    short R2 = 4; //commande du relais 2
-    short R3 = 7; //commande du relais 3
-    short R0STATE = LOW;
-    short R1STATE = LOW;
-    short R2STATE = LOW;
-    short R3STATE = LOW;
+     short servo_nourrssage = 3; //commande du servomoteur de nourrissage
+     int chipSelect = 8; //CS sur le spi de la carte SD
+     int DDS = 2; // DATA sur les dallas 18b20
+     int R0 = A2; //commande du relais 0
+     int R1 = A3; //commande du relais 1
+     int R2 = 4; //commande du relais 2
+     int R3 = 7; //commande du relais 3
+     
+     
+     int R0STATE = '0';
+     int R1STATE = '0';
+     int R2STATE = '0';
+     int R3STATE = '0';
     
-    short servo_nourrssage = 3; //commande du servomoteur de nourrissage
+   
 
 // declaration des librairies
     #include <SPI.h>
@@ -72,16 +75,16 @@ ________Martin Vert 2015________________________________________________________
 void setup() {
 // initialise les quatres relais
     pinMode(R0, OUTPUT);
-    digitalWrite(R0, R0STATE);
+    digitalWrite(R0, LOW);
     
     pinMode(R1, OUTPUT);
-    digitalWrite(R1, R1STATE);
+    digitalWrite(R1, LOW);
     
     pinMode(R2, OUTPUT);
-    digitalWrite(R2, R2STATE);
+    digitalWrite(R2, LOW);
     
     pinMode(R3, OUTPUT);
-    digitalWrite(R3, R3STATE);
+    digitalWrite(R3, LOW);
     
     
     
@@ -146,6 +149,12 @@ void loop() {
       Serial.print(tmYearToCalendar(tm.Year));
       Serial.println();
       nourir();
+      relais('0');
+      relais('1');
+      relais('2');
+      relais('3');
+     
+      
       lastminute = tm.Minute;
 //fin du code executé toutes les minutes
    }
@@ -188,29 +197,72 @@ nourrissage.write(0);              // tell servo to go to position in variable '
 }
 
 
-void relais(short numero)
+void relais(int numero)
 {
+  
 //allume le relais ou l'eteind selon son etat
   switch (numero) {
-    case 'R0':    // your hand is on the sensor
-      if(R0STATE = LOW)
+    case '0':   
+      if(R0STATE == '0')
     {
-      
+      digitalWrite(R0, HIGH);
+      R0STATE = '1';
+      Serial.println("RO ON");
     }
     else
     {
-    
+      digitalWrite(R0, LOW);
+      R0STATE = '0';
+      Serial.println("RO OFF");
     }
       break;
-    case 'R1':    // your hand is close to the sensor
-      Serial.println("dim");
+    case '1':    
+           if(R1STATE == '0')
+    {
+      digitalWrite(R1, HIGH);
+      R1STATE = '1';
+      Serial.println("R1 ON");
+    }
+    else
+    {
+      digitalWrite(R1, LOW);
+      R0STATE = '0';
+      Serial.println("R1 OFF");
+    }
       break;
-    case 'R2':    // your hand is a few inches from the sensor
-      Serial.println("medium");
+    case '2':    
+            if(R2STATE == '0')
+    {
+      digitalWrite(R2, HIGH);
+      R2STATE = '1';
+      Serial.println("R2 ON");
+    }
+    else
+    {
+      digitalWrite(R2, LOW);
+      R2STATE = '0';
+      Serial.println("R2 OFF");
+    }
       break;
-    case 'R3':    // your hand is nowhere near the sensor
-      Serial.println("bright");
-      break;
+      
+      
+    case '3':    
+            if(R3STATE == '0')
+    {
+      digitalWrite(R3, HIGH);
+      R3STATE = '1';
+      Serial.println("R3 ON");
+    }
+    else
+    {
+      digitalWrite(R3, LOW);
+      R3STATE = '0';
+      Serial.println("R3 OFF");
+    }
+    break;
+    default: 
+    Serial.println("mauvais appel relais");
+     
   }
 }
 
