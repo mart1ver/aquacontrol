@@ -1,5 +1,6 @@
 /*
-controle instalation aquaponique suspendue
+________Martin Vert 2015____________________________________________________________________________________________________________________ 
+Controle de l'instalation aquaponique suspendue de l'atelier de la petite rockette
 
  * SD connctée au bus SPI comme ceci:
     ** MOSI - pin 11
@@ -7,38 +8,40 @@ controle instalation aquaponique suspendue
     ** CLK - pin 13
     ** CS - pin 8
  * module rtc et  eeprom connecté au bus I2C comme ceci:
-   ** sda - pin A4
-   ** scl - pin A5
+    ** sda - pin A4
+    ** scl - pin A5
  * capteurs de temperature ds 18B20 connecté sur bus dedié en mode parasite comme ceci:
-   ** data - pin 2
+    ** data - pin 2
  * 3 capteurs dht11 conectes sur les broches pwm suivantes:
-   ** 1 - pin 9
-   ** 2 - pin 6
-   ** 3 - pin 5
+    ** 1 - pin 9
+    ** 2 - pin 6
+    ** 3 - pin 5
  * 4 relais de commande pompes et eclairages connectes sur les broches suivante:
-   ** 1 - pin A2 (pompe primaire)
-   ** 2 - pin A3 (eclairage aquarium)
-   ** 3 - pin 4
-   ** 4 - pin 7
+    ** 1 - pin A2 (pompe primaire)      >> R0
+    ** 2 - pin A3 (eclairage aquarium)  >> R1
+    ** 3 - pin 4                        >> R2
+    ** 4 - pin 7                        >> R3
  * servomoteur de nourissage des poissons
-   ** pwm - pin 3
+    ** pwm - pin 3
  * capteur de niveau d'eau aquarium
-   **  A prevoir niveau materiel
- * capteur ph eau de l'aquarium
-   **  A prevoir niveau materiel
-=================le fichier de configuration config.txt sur la carte sd==================================
-Contient, (separé par des virgules?), différentes variables de configuration du cycle:
--horaires de declenchement de la pompe
--horaires de declenchement de l'eclairage
--nombre de minutes entre chaque prise de logs
--eventuellement ph cible (pour les versions anterieures, car le materiel n'est pas pret..)
--eventuellement les niveau mini et maxi tolerables dans l'aquarium (pour les versions anterieures, car le materiel n'est pas pret..)
+    **  A prevoir niveau materiel (A0 ?)
+ * capteur ph eau de l'aquarium  (A1 ?)
+    **  A prevoir niveau materiel
+==================================le fichier de configuration config.txt sur la carte sd==================================
+ Contient, (separé par des virgules?), différentes variables de configuration du cycle:
+  -horaires de declenchement de la pompe
+  -horaires de declenchement de l'eclairage
+  -nombre de minutes entre chaque prise de logs
+  -eventuellement ph cible (pour les versions anterieures, car le materiel n'est pas pret..)
+  -eventuellement les niveau mini et maxi tolerables dans l'aquarium (pour les prochaines versions, car le materiel n'est pas pret..)
 
-=================le fichier de logs log.csv sur la carte sd==================================
-Contient, au format csv, les données des logs
+==================================le fichier de logs log.csv sur la carte sd==================================
+ Contient, au format csv, les données des logs
 
 ________Martin Vert 2015____________________________________________________________________________________________________________________ 
- */
+*/
+ 
+ 
  // declaration des E/S
      short servo_nourrssage = 3; //commande du servomoteur de nourrissage
      int chipSelect = 8; //CS sur le spi de la carte SD
@@ -48,15 +51,13 @@ ________Martin Vert 2015________________________________________________________
      int R2 = 4; //commande du relais 2
      int R3 = 7; //commande du relais 3
      
-     
+ // declaration de variables d'etat des 4 relais de commande      
      int R0STATE = '0';
      int R1STATE = '0';
      int R2STATE = '0';
      int R3STATE = '0';
     
-   
-
-// declaration des librairies
+ // declaration des librairies
     #include <SPI.h>
     #include <SD.h>
     #include <Wire.h>
@@ -66,70 +67,63 @@ ________Martin Vert 2015________________________________________________________
     #include <dht.h> 
     #include <Servo.h> 
 
-//autres declarations
-    Servo nourrissage; //initialisation de la lib servo  
-    tmElements_t tm; // prise de l'heure
-    int lastminute = tm.Minute ;//initialise les variables liees à la mesure du temps
-    int theminute = tm.Minute;//initialise les variables liees à la mesure du temps
+ // autres declarations
+    Servo nourrissage;                // initialisation de la librairie servo  
+    tmElements_t tm;                  // prise de l'heure
+    int lastminute = tm.Minute ;      // initialise les variables liees à la mesure du temps
+    int theminute = tm.Minute;        // initialise les variables liees à la mesure du temps
   
-void setup() {
-// initialise les quatres relais
+void setup() {                        // code executé une fois au démarage
+ // initialise les quatres sorties relais à l'etat 0
     pinMode(R0, OUTPUT);
     digitalWrite(R0, LOW);
-    
     pinMode(R1, OUTPUT);
-    digitalWrite(R1, LOW);
-    
+    digitalWrite(R1, LOW);  
     pinMode(R2, OUTPUT);
     digitalWrite(R2, LOW);
-    
     pinMode(R3, OUTPUT);
     digitalWrite(R3, LOW);
     
-    
-    
-       
-    
-    
-    nourrissage.attach(servo_nourrssage);  // attaches the servo on 'servo_nourrisage' to the servo object 
-    nourrissage.write(0);              // servo_nourrissage en position '0'
-    delay(150);   
-    Serial.begin(115200);
-    while (!Serial) ; // wait for serial
-    delay(200);
+    nourrissage.attach(servo_nourrssage);  // liaison du servomoteur de nourrisage à 'servo_nourrisage'
+    nourrissage.write(0);                  // servo_nourrissage en position '0'
+    delay(150);                            // petite pose
+    Serial.begin(115200);                  // initialisation de la liaison serielle (115200 bauds)
+    while (!Serial) ;                      // wait for serial
+    delay(200);                            // petite pause
+ // message initial sur le terminal serie   
     Serial.println(" __________________________ ");
     Serial.println("(Controlleur Mur vegetal MV)");
     Serial.println("(V. 0.0.0 non fonctionnel)"); 
     Serial.print("initialisation de la carte SD...");
-// placer le chipselect du spi en output au cas ou...
+ // placer le chipselect du spi en output au cas ou...
     pinMode(chipSelect, OUTPUT);
-// verrifier si la carte sd est bien presente et initialisée.
+ // verrifier si la carte sd est bien presente et initialisée.
     if (!SD.begin(chipSelect)) {
       Serial.println("Erreur de carte SD, ou carte SD non presente");
       return;
     }
     Serial.println("Carte SD initialisee.");
-// open the file. note that only one file can be open at a time,
-// so you have to close this one before opening another.
+// ouvre config.txt. NOTE: un seul fichier peut etre ouvert à la fois il faudra fermer ce fichier avant d'acceder à un autre dans le sketch
     File dataFile = SD.open("config.txt");
-// if the file is available, write to it:
+
+// if the file is available, write to it: si le fichier est disponible alors on affiche son contenu sur le terminal serie puis on le charge dans l'EEPROM                      FIXME  FIXME 
     if (dataFile) {
       while (dataFile.available()) {
       Serial.write(dataFile.read());
       }
       dataFile.close();
     }  
-// if the file isn't open, pop up an error:
+// si le fichier ne se charge pas , on affiche un message d'erreur sur le terminal serie
     else {
     Serial.println("erreur à l'ouverture de config.txt");
     } 
-    delay(850);
+    delay(850); // pause
   }
   
 void loop() {
-    tmElements_t tm;
+    tmElements_t tm;                                           //prise de l'heure
    if (theminute > lastminute){
-//code executé tout les X minutes (ecore non codé...)
+//code executé tout les X minutes (ecore non codé...) FIXME FIXME
 //fin du code executé toutes les X minutes
 } 
    if (theminute > lastminute){
