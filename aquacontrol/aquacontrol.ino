@@ -10,12 +10,12 @@ Controle de l'instalation aquaponique suspendue de l'atelier de la petite rocket
  * module rtc et  eeprom connecté au bus I2C comme ceci:
     ** sda - pin A4
     ** scl - pin A5
- * capteurs de temperature ds 18B20 connecté sur bus dedié en mode parasite comme ceci:
-    ** data - pin 2
- * 3 capteurs dht11 conectes sur les broches pwm suivantes:
-    ** 1 - pin 9
-    ** 2 - pin 6
-    ** 3 - pin 5
+supprimé * capteurs de temperature ds 18B20 connecté sur bus dedié en mode parasite comme ceci:
+supprimé    ** data - pin 2 
+supprimé * 3 capteurs dht11 conectes sur les broches pwm suivantes:
+supprimé    ** 1 - pin 9
+supprimé    ** 2 - pin 6
+supprimé    ** 3 - pin 5
  * 4 relais de commande pompes et eclairages connectes sur les broches suivante:
     ** 1 - pin A2 (pompe primaire)      >> R0
     ** 2 - pin A3 (eclairage aquarium)  >> R1
@@ -44,18 +44,17 @@ ________Martin Vert 2015________________________________________________________
  
  // declaration des E/S
      short servo_nourrssage = 3; //commande du servomoteur de nourrissage
-     int chipSelect = 8; //CS sur le spi de la carte SD
-     int DDS = 2; // DATA sur les dallas 18b20
-     int R0 = A2; //commande du relais 0
-     int R1 = A3; //commande du relais 1
-     int R2 = 4; //commande du relais 2
-     int R3 = 7; //commande du relais 3
+     short chipSelect = 8; //CS sur le spi de la carte SD
+     short R0 = 2; //commande du relais 0
+     short R1 = 5; //commande du relais 1
+     short R2 = 4; //commande du relais 2
+     short R3 = 7; //commande du relais 3
      
  // declaration de variables d'etat des 4 relais de commande      
-     int R0STATE = '0';
-     int R1STATE = '0';
-     int R2STATE = '0';
-     int R3STATE = '0';
+     short R0STATE = '0';
+     short R1STATE = '0';
+     short R2STATE = '0';
+     short R3STATE = '0';
     
  // declaration des librairies
     #include <SPI.h>
@@ -63,8 +62,8 @@ ________Martin Vert 2015________________________________________________________
     #include <Wire.h>
     #include <Time.h>
     #include <DS1307RTC.h>
-    #include <OneWire.h>
-    #include <dht.h> 
+    #include "Adafruit_MCP9808.h"
+    #include "Adafruit_HDC1000.h"
     #include <Servo.h> 
 
  // autres declarations
@@ -72,6 +71,9 @@ ________Martin Vert 2015________________________________________________________
     tmElements_t tm;                  // prise de l'heure
     int lastminute = tm.Minute ;      // initialise les variables liees à la mesure du temps
     int theminute = tm.Minute;        // initialise les variables liees à la mesure du temps
+    
+    Adafruit_MCP9808 tempsensor = Adafruit_MCP9808();
+    Adafruit_HDC1000 hdc = Adafruit_HDC1000();
   
 void setup() {                        // code executé une fois au démarage
  // initialise les quatres sorties relais à l'etat 0
@@ -147,6 +149,7 @@ void loop() {
       relais('1');
       relais('2');
       relais('3');
+      enregistre();
      
       
       lastminute = tm.Minute;
@@ -191,7 +194,7 @@ nourrissage.write(0);              // tell servo to go to position in variable '
 }
 
 
-void relais(int numero)
+void relais(short numero)
 {
   
 //allume le relais ou l'eteind selon son etat
@@ -263,5 +266,28 @@ void relais(int numero)
 
 void enregistre()
 {
-//enregistre les données des differents capteurs sur la carte sd
+//enregistre les données des differents capteurs sur la carte sd ,on les afffiche aussi sur la console
+int tim = 10;
+  tempsensor.begin();
+  tempsensor.shutdown_wake(0);
+  float c = tempsensor.readTempC();
+  Serial.print("Temp 1 : "); Serial.print(c); Serial.println("*C\t"); 
+  delay(tim);
+  tempsensor.shutdown_wake(1); 
+  delay(tim);
+  tempsensor.begin(0x19);
+  tempsensor.shutdown_wake(0);
+  c = tempsensor.readTempC();
+  Serial.print("Temp 2 : "); Serial.print(c); Serial.println("*C\t"); 
+  delay(tim);
+  tempsensor.shutdown_wake(1); // shutdown MSP9808 - power consumption ~0.1 mikro Ampere
+  hdc.begin();
+  Serial.print("Temp 3 : "); Serial.print(hdc.readTemperature());
+  Serial.print("\t\tHum 3 : "); Serial.println(hdc.readHumidity());
+  delay(tim);
+  hdc.begin(0x41);
+  Serial.print("Temp 4 : "); Serial.print(hdc.readTemperature());
+  Serial.print("\t\tHum 4 : "); Serial.println(hdc.readHumidity());
+  delay(tim);
+  Serial.println();
 }
